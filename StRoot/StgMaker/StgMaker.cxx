@@ -14,25 +14,24 @@
 #include <map>
 #include <string>
 
-#include "StEvent.h"
-#include "StRnDHitCollection.h"
-#include "StRnDHit.h"
-#include "StTrack.h"
-#include "StTrackNode.h"
-#include "StGlobalTrack.h"
-#include "StPrimaryTrack.h"
-#include "StTrackGeometry.h"
-#include "StHelixModel.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StRnDHitCollection.h"
+#include "StEvent/StRnDHit.h"
+#include "StEvent/StTrack.h"
+#include "StEvent/StTrackNode.h"
+#include "StEvent/StGlobalTrack.h"
+#include "StEvent/StPrimaryTrack.h"
+#include "StEvent/StTrackGeometry.h"
+#include "StEvent/StHelixModel.h"
+#include "StEvent/StTrackDetectorInfo.h"
+#include "StEvent/StEnumerations.h"
 
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_fts_hit_Table.h"
 
-#include "StarMagField.h"
+#include "StarMagField/StarMagField.h"
 
 #include "StEventUtilities/StEventHelper.h"
-
-#include "StTrackDetectorInfo.h"
-#include "StEvent/StEnumerations.h"
 
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include "St_base/StMessMgr.h"
