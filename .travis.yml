@@ -1,2 +1,10 @@
-language: nix
+language: cxx
+
+services:
+  - docker
+
+before_install:
+  - docker pull starbnl/star-sw:latest
+  - docker images
+
 script: true
