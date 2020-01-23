@@ -8,10 +8,13 @@ addons:
     packages:
       - docker-ce
 
+env: STAR_CVS_REF=master
+
 before_install:
+  - echo "STAR_CVS_REF=$STAR_CVS_REF"
   - docker --version
   - docker pull starbnl/star-sw:latest-build
   - docker images
-  - docker build -t starbnl/star-sw:latest-build --build-arg STAR_CVS_REF=master --build-arg STAR_BUILD_TYPE=Release --build-arg STAR_BASE_IMAGE=starbnl/star-base:centos7 --build-arg STAR_SW_REF=master --target build-stage --cache-from starbnl/star-sw:latest-build .
+  - docker build -t starbnl/star-sw:latest-build --build-arg STAR_CVS_REF=$STAR_CVS_REF --build-arg STAR_BUILD_TYPE=Release --build-arg STAR_BASE_IMAGE=starbnl/star-base:centos7 --build-arg STAR_SW_REF=master --target build-stage --cache-from starbnl/star-sw:latest-build .
 
 script: true
