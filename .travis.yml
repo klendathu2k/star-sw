@@ -3,15 +3,14 @@ language: cxx
 services:
   - docker
 
-addons:
-  apt:
-    packages:
-      - docker-ce
-
 env: STAR_CVS_REF=master
 
 before_install:
   - echo "STAR_CVS_REF=$STAR_CVS_REF"
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
   - docker --version
   - docker pull starbnl/star-sw:latest-build
   - docker images
