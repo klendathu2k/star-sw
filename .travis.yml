@@ -6,18 +6,36 @@ services:
 git:
   clone: false
 
-env: STAR_CVS_REF=master
+env:
+  - STAR_SW_REF=v0.4.2 STAR_CVS_REF_BEFORE=a989cbbd STAR_CVS_REF_AFTER=master
 
 before_install:
-  - echo "STAR_CVS_REF=$STAR_CVS_REF"
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  - sudo apt-get update
-  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
-  - docker --version
-  - docker pull starbnl/star-sw:latest-build
-  - docker images
-  - docker create --name latest-build starbnl/star-sw:latest-build
-  - docker ps -a
+  - echo "STAR_SW_REF=$STAR_SW_REF"
+  - echo "STAR_CVS_REF_BEFORE=$STAR_CVS_REF_BEFORE"
+  - echo "STAR_CVS_REF_AFTER=$STAR_CVS_REF_AFTER"
 
-script: true
+install:
+  #- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  #- sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  #- sudo apt-get update
+  #- sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+
+before_script:
+  #- curl -s -L https://github.com/star-bnl/star-sw/archive/${STAR_SW_REF}.tar.gz  | tar -xz -C /tmp && mv /tmp/star-sw-${STAR_SW_REF} /tmp/star-sw
+  - cd /tmp
+  - curl -s -L https://github.com/star-bnl/star-cvs/archive/${STAR_CVS_REF_BEFORE}.tar.gz  | tar -xz -C . && export TOP_DIR=`ls -d star-cvs*/` && ln -s $TOP_DIR star-cvs
+  - ls -la
+  - curl -s -L https://github.com/star-bnl/star-cvs/compare/${STAR_CVS_REF_BEFORE}...${STAR_CVS_REF_AFTER}.diff > patch.diff
+  - cat patch.diff
+  - ls -la
+  - docker --version
+  - docker pull starbnl/star-sw:${STAR_CVS_REF_BEFORE}-RelWithDebInfo-${STAR_SW_REF}-build
+  - docker images
+
+script:
+  - echo "TOP_DIR = $TOP_DIR"
+  - pwd
+  - ls -la
+  - docker run -v /tmp/${TOP_DIR}:/tmp/star-cvs starbnl/star-sw:${STAR_CVS_REF_BEFORE}-RelWithDebInfo-${STAR_SW_REF}-build make -j $(nproc)
+  - patch -p1 -d /tmp/${TOP_DIR} < /tmp/patch.diff
+  - docker run -v /tmp/${TOP_DIR}:/tmp/star-cvs starbnl/star-sw:${STAR_CVS_REF_BEFORE}-RelWithDebInfo-${STAR_SW_REF}-build make -j $(nproc)
