@@ -17,6 +17,7 @@ before_install:
   - docker --version
   - docker pull starbnl/star-sw:latest-build
   - docker images
-  - docker build -t starbnl/star-sw:latest-build --build-arg STAR_CVS_REF=$STAR_CVS_REF --build-arg STAR_BUILD_TYPE=Release --build-arg STAR_BASE_IMAGE=starbnl/star-base:centos7 --build-arg STAR_SW_REF=master --target build-stage --cache-from starbnl/star-sw:latest-build .
+  - docker create --name latest-build starbnl/star-sw:latest-build
+  - docker ps -a
 
 script: true
