@@ -3,6 +3,9 @@ language: cxx
 services:
   - docker
 
+git:
+  clone: false
+
 env: STAR_CVS_REF=master
 
 before_install:
