@@ -1,7 +1,7 @@
 TString infile = "testg.fzd";
+
 void testg( size_t n_events = 1000, const char *filename = 0 )
 {
-
    if (filename) infile = filename;
 
    gROOT->LoadMacro("bfc.C");
@@ -15,7 +15,7 @@ void testg( size_t n_events = 1000, const char *filename = 0 )
    // Force build of the geometry
    TFile *geom = TFile::Open("fGeom.root");
 
-   if ( 0 == geom ) {
+   if (!geom) {
       AgModule::SetStacker( new StarTGeoStacker() );
       AgPosition::SetDebug(2);
       StarGeometry::Construct("dev2021");
@@ -47,8 +47,7 @@ void testg( size_t n_events = 1000, const char *filename = 0 )
 
       cout << "===============================================================================" << endl;
       cout << "===============================================================================" << endl;
-      cout << endl << endl;
-      cout << "Processing event number " << count++ << endl << endl;
+      cout << "Processing event number " << count++ << endl;
       cout << "===============================================================================" << endl;
       cout << "===============================================================================" << endl;
 
@@ -58,5 +57,4 @@ void testg( size_t n_events = 1000, const char *filename = 0 )
       if (stat) break;
 
    }
-
 }

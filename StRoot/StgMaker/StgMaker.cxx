@@ -39,13 +39,11 @@
 #include "St_base/StMessMgr.h"
 
 
-//_______________________________________________________________________________________
 // For now, accept anything we are passed, no matter what it is or how bad it is
 template<typename T> bool accept( T ) { return true; }
 
 template<> bool accept( genfit::Track *track )
 {
-
   // This also gets rid of failed fits (but may need to explicitly
   // for fit failure...)
   if (track->getNumPoints() <= 0 ) return false; // fit may have failed
@@ -56,22 +54,22 @@ template<> bool accept( genfit::Track *track )
   TVector3 momentum = atFirstPoint.getMom();
   double   pt = momentum.Perp();
 
-
   if (pt < 0.10 ) return false; // below this
 
   return true;
 };
 
 
-//_______________________________________________________________________________________
 // Adaptor for STAR magnetic field
 class StarFieldAdaptor : public genfit::AbsBField
 {
 public:
+
   StarFieldAdaptor()
   {
     _gField = this; // global pointer in TrackFitter.h
   };
+
   virtual TVector3 get(const TVector3 &position) const
   {
     double x[] = { position[0], position[1], position[2] };
@@ -81,6 +79,7 @@ public:
 
     return TVector3( B );
   };
+
   virtual void     get(const double &_x, const double &_y, const double &_z, double &Bx, double &By, double &Bz ) const
   {
     double x[] = { _x, _y, _z };
@@ -94,8 +93,6 @@ public:
     return;
   };
 };
-
-
 
 
 //  Wrapper class around the forward tracker
@@ -133,19 +130,23 @@ public:
 
 };
 
+
 // Wrapper around the hit load.
 class ForwardHitLoader : public IHitLoader
 {
 public:
+
   unsigned long long nEvents() { return 1; }
   std::map<int, std::vector<KiTrack::IHit *> > &load( unsigned long long )
   {
     return _hits;
   };
+
   std::map<int, std::vector<KiTrack::IHit *> > &loadSi( unsigned long long )
   {
     return _fsi_hits;
   };
+
   std::map<int, shared_ptr<McTrack>> &getMcTrackMap()
   {
     return _mctracks;
@@ -165,11 +166,11 @@ public:
   std::map<int, shared_ptr<McTrack> > _mctracks;
 };
 
-//________________________________________________________________________
+
 StgMaker::StgMaker() : StMaker("stg"), mForwardTracker(0), mForwardHitLoader(0), mFieldAdaptor(new StarFieldAdaptor())
 {
-
 };
+
 
 int StgMaker::Finish()
 {
@@ -186,10 +187,9 @@ int StgMaker::Finish()
   return kStOk;
 }
 
-//________________________________________________________________________
+
 int StgMaker::Init()
 {
-
   // Initialize configuration file
   std::string configFile = "config.xml";
   std::map<string, string> cmdLineConfig;
@@ -227,7 +227,8 @@ int StgMaker::Init()
 
   return kStOK;
 };
-//________________________________________________________________________
+
+
 int StgMaker::Make()
 {
   LOG_INFO << "StgMaker::Make()   " << endm;
@@ -236,7 +237,6 @@ int StgMaker::Make()
   const double z_stgc[] = { 280.9, 303.7, 326.6, 349.4 };
   const double z_wcal[] = { 711.0 };
   const double z_hcal[] = { 740.0 }; // TODO: get correct value
-
 
   // I am a horrible person for doing this by reference, but at least
   // I don't use "goto" anywhere.
@@ -319,8 +319,7 @@ int StgMaker::Make()
     hitMap[ hit->getSector() ].push_back(hit);
 
     // Add hit pointer to the track
-    if ( mcTrackMap[ track_id ] )    mcTrackMap[ track_id ]->addHit( hit );
-
+    if ( mcTrackMap[ track_id ] )   mcTrackMap[ track_id ]->addHit( hit );
   }
 
   /************************************************************/
@@ -367,7 +366,6 @@ int StgMaker::Make()
 
   LOG_INFO << "mForwardTracker -> doEvent()" << endm;
 
-
   // Process single event
   mForwardTracker -> doEvent();
 
@@ -412,18 +410,18 @@ int StgMaker::Make()
       LOG_INFO << "truth: pt=" << mctrack->_pt << " eta=" << mctrack->_eta << " phi=" << mctrack->_phi << " q=" << mctrack->_q << endm;
   }
 
-
   return kStOK;
 }
-//________________________________________________________________________
+
+
 void StgMaker::Clear( const Option_t *opts )
 {
   mForwardHitLoader->clear();
 }
-//________________________________________________________________________
+
+
 void StgMaker::FillEvent()
 {
-
   StEvent *event = static_cast<StEvent *>(GetInputDS("StEvent"));
   assert(event); // we warned ya
 
@@ -494,10 +492,10 @@ void StgMaker::FillEvent()
   } // end of loop over tracks
 
   LOG_INFO << "  number accepted = " <<   track_count_accept << endm;
-
 }
-//________________________________________________________________________
-void StgMaker::FillTrack( StTrack             *otrack, genfit::Track *itrack, const Seed_t &iseed, StTrackDetectorInfo *info )
+
+
+void StgMaker::FillTrack( StTrack *otrack, genfit::Track *itrack, const Seed_t &iseed, StTrackDetectorInfo *info )
 {
   const double z_fst[]  = { 93.3, 140.0, 186.6 };
   const double z_stgc[] = { 280.9, 303.7, 326.6, 349.4 };
@@ -543,11 +541,10 @@ void StgMaker::FillTrack( StTrack             *otrack, genfit::Track *itrack, co
   // If the track is a global track, fill the DCA geometry
   if ( global == otrack->type() ) FillTrackDcaGeometry( otrack, itrack );
 
-
-
   //covM[k++] = M(0,5); covM[k++] = M(1,5); covM[k++] = M(2,5); covM[k++] = M(3,5); covM[k++] = M(4,5); covM[k++] = M(5,5);
 }
-//________________________________________________________________________
+
+
 void StgMaker::FillTrackFlags( StTrack *otrack, genfit::Track *itrack )
 {
 
@@ -588,7 +585,6 @@ void StgMaker::FillTrackFlags( StTrack *otrack, genfit::Track *itrack )
    *
    *      = +x11 -> Short track pointing to EEMC */
 
-
   // NOTE: First digit will be used as follows for forward tracks
   //
   // x = 5 sTGC only
@@ -604,12 +600,11 @@ void StgMaker::FillTrackFlags( StTrack *otrack, genfit::Track *itrack )
 
   // As for "bad" fits, I believe GenFit does not propagate fit information for
   // failed fits.  (???).  So we will not publish bad track flags.
-
 }
-//________________________________________________________________________
+
+
 void StgMaker::FillTrackMatches( StTrack *otrack, genfit::Track *itrack )
 {
-
   // TODO:
 
   // At midrapidity, we extend the track to the fast detectors and check to see whether
@@ -629,10 +624,10 @@ void StgMaker::FillTrackMatches( StTrack *otrack, genfit::Track *itrack )
   // Save the state of the fit (mapped to a helix) at the front of the EM cal as the "Ext" geometry
   // ... helix would have no curvature at that point and would be a straight line, as there is no b field.
   // ... can easily get to the HCAL from there...
-
 }
-//________________________________________________________________________
-void StgMaker::FillTrackFitTraits( StTrack             *otrack, genfit::Track *itrack )
+
+
+void StgMaker::FillTrackFitTraits( StTrack *otrack, genfit::Track *itrack )
 {
 
   const double z_fst[]  = { 93.3, 140.0, 186.6 };
@@ -735,24 +730,21 @@ void StgMaker::FillTrackFitTraits( StTrack             *otrack, genfit::Track *i
 
   otrack -> setFitTraits( fit_traits );
 
-
-
 }
-//________________________________________________________________________
-void StgMaker::FillTrackGeometry( StTrack             *otrack, genfit::Track *itrack, double zplane, int io )
-{
 
+
+void StgMaker::FillTrackGeometry( StTrack *otrack, genfit::Track *itrack, double zplane, int io )
+{
   int ipoint = 0;
 
   if ( io == kInnerGeometry ) ipoint = 0; // hardcoded to sTGC only for now
-  else                      ipoint = 3;
+  else                        ipoint = 3;
 
   // Obtain fitted state
   genfit::MeasuredStateOnPlane measuredState = itrack->getFittedState(ipoint);
 
   // Obtain the cardinal representation
   genfit::AbsTrackRep *cardinal = itrack->getCardinalRep();
-
 
   // We really don't want the overhead in the TVector3 ctor/dtor here
   static TVector3 xhat(1, 0, 0), yhat(0, 1, 0), Z(0, 0, 0);
@@ -786,8 +778,7 @@ void StgMaker::FillTrackGeometry( StTrack             *otrack, genfit::Track *it
 
   measuredState.getPosMomCov(pos, mom, cov);
 
-  for ( int i = 0; i < 3; i++ )  momentum[i] = mom[i];
-
+  for ( int i = 0; i < 3; i++ ) momentum[i] = mom[i];
   for ( int i = 0; i < 3; i++ ) origin[i]   = pos[i];
 
   double charge = measuredState.getCharge();
@@ -823,20 +814,17 @@ void StgMaker::FillTrackGeometry( StTrack             *otrack, genfit::Track *it
   // Create the track geometry
   StTrackGeometry *geometry = new StHelixModel (q, psi, curv, dip, origin, momentum, h);
 
-
   // TODO: check helix parameters... geometry->helix() should return an StPhysicalHelix...
   //       double check that we converted everthing correctly.
 
 
   if ( kInnerGeometry == io ) otrack->setGeometry( geometry );
   else                        otrack->setOuterGeometry( geometry );
-
-
 }
-//________________________________________________________________________
-void StgMaker::FillTrackDcaGeometry( StTrack          *otrack_, genfit::Track *itrack )
-{
 
+
+void StgMaker::FillTrackDcaGeometry( StTrack *otrack_, genfit::Track *itrack )
+{
   // Recast to global track
   StGlobalTrack *otrack = dynamic_cast<StGlobalTrack *>(otrack_);
 
@@ -874,8 +862,7 @@ void StgMaker::FillTrackDcaGeometry( StTrack          *otrack_, genfit::Track *i
 
   measuredState.getPosMom(pos, mom);
 
-  for ( int i = 0; i < 3; i++ )  momentum[i] = mom[i];
-
+  for ( int i = 0; i < 3; i++ ) momentum[i] = mom[i];
   for ( int i = 0; i < 3; i++ ) origin[i]   = pos[i];
 
   double charge = measuredState.getCharge();
@@ -897,12 +884,9 @@ void StgMaker::FillTrackDcaGeometry( StTrack          *otrack_, genfit::Track *i
   state = measuredState.getState();
   cov   = measuredState.getCov();
 
-
   // Below is one way to convert the parameters to a helix, using the
   // StPhysicalHelix class
 
-
-#if 1
   double eta    = momentum.pseudoRapidity();
   double pt     = momentum.perp();
   double ptinv  = (pt != 0) ? 1.0 / pt : std::numeric_limits<double>::max();
@@ -969,19 +953,14 @@ void StgMaker::FillTrackDcaGeometry( StTrack          *otrack_, genfit::Track *i
   // TODO: fill in errors... (do this numerically?)
   double e[15] = {};
 
-
   StDcaGeometry *dca = new StDcaGeometry;
   otrack->setDcaGeometry(dca);
   dca->set(p, e);
-
-#endif
-
-
 }
-// //________________________________________________________________________
-void StgMaker::FillDetectorInfo(  StTrackDetectorInfo *info, genfit::Track *track, bool increment )
-{
 
+
+void StgMaker::FillDetectorInfo( StTrackDetectorInfo *info, genfit::Track *track, bool increment )
+{
   //   // here is where we would fill in
   //   // 1) total number of hits
   //   // 2) number of sTGC hits
@@ -990,7 +969,6 @@ void StgMaker::FillDetectorInfo(  StTrackDetectorInfo *info, genfit::Track *trac
   //   // 5) The position of the first and last hits on the track
 
   int ntotal   = track->getNumPoints(); // vs getNumPointsWithMeasurement() ?
-  int nstgc    = ntotal;
 
   float zmin =  9E9;
   float zmax = -9E9;
@@ -1034,13 +1012,9 @@ void StgMaker::FillDetectorInfo(  StTrackDetectorInfo *info, genfit::Track *trac
 
   }
 
-
   assert(count);
 
-  info -> setFirstPoint( firstPoint );
-  info -> setLastPoint( lastPoint );
-  info -> setNumberOfPoints( ntotal, kUnknownId ); // TODO: Assign
-
-
+  info->setFirstPoint( firstPoint );
+  info->setLastPoint( lastPoint );
+  info->setNumberOfPoints( ntotal, kUnknownId ); // TODO: Assign
 }
-//________________________________________________________________________
