@@ -1,6 +1,6 @@
 TString infile = "testg.fzd";
 
-void testg( size_t n_events = 1000, const char *filename = 0 )
+void testg( size_t n_events = 100, const char *filename = 0 )
 {
    if (filename) infile = filename;
 
