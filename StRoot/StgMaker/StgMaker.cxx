@@ -594,6 +594,7 @@ void StgMaker::FillTrackFlags( StTrack *otrack, genfit::Track *itrack )
 
   // TODO: detect presence of silicon hits and add appropriately to the flag
 
+  otrack->setFlag(flag);
 
   // As for "bad" fits, I believe GenFit does not propagate fit information for
   // failed fits.  (???).  So we will not publish bad track flags.
